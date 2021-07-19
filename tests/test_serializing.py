@@ -3,7 +3,7 @@ from fractions import Fraction
 
 import pytest
 
-from ddbcereal import NumberInexact
+from ddbcereal import NumberInexactError
 from ddbcereal.serializing import Serializer
 from ddbcereal.types import DynamoDBType
 
@@ -51,7 +51,7 @@ def test_number_validation():
     assert (inexact_serializer.serialize(BIG_INVALID_INT)
             == {'N': '1.0000000000000000000000000000000000000E+100'})
 
-    with pytest.raises(NumberInexact):
+    with pytest.raises(NumberInexactError):
         exact_serializer.serialize(BIG_INVALID_INT)
 
     assert (exact_lax_serializer.serialize(BIG_INVALID_INT)
@@ -76,7 +76,7 @@ def test_fractions():
 
     assert (inexact_serializer.serialize(ntsc_film_rate)
             == {'N': '23.976023976023976023976023976023976024'})
-    with pytest.raises(NumberInexact):
+    with pytest.raises(NumberInexactError):
         exact_serializer.serialize(ntsc_film_rate)
     assert string_serializer.serialize(ntsc_film_rate) == {'S': '24000/1001'}
 

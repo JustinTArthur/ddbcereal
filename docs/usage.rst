@@ -78,8 +78,8 @@ your needs.
       mistakes might only be caught after the serialized value has been sent
       to DynamoDB.
 
-   :param bool validate_strings: Raises a ``ValueError`` on attempts to
-      serialize empty strings, which DynamoDB can't store. Disabling will
+   :param bool validate_strings: Raises a ``StringNotAllowedError`` on attempts
+      to serialize empty strings, which DynamoDB can't store. Disabling will
       result in faster serialization.
 
    :param DateFormat datetime_format: Determines how Python datetimes should be
@@ -154,3 +154,16 @@ Deserializer Options
    :param Callable[[], Any] python_null_factory: A function invoked for every
       DynamoDB Null value. The Null is converted to the return value of the
       function. ``python_null_value`` is ignored if this is supplied.
+
+Exceptions
+----------
+.. versionadded:: 1.1.0
+
+.. autoexception:: ddbcereal.NumberInexactError
+  :show-inheritance:
+
+.. autoexception:: ddbcereal.NumberNotAllowedError
+  :show-inheritance:
+
+.. autoexception:: ddbcereal.StringNotAllowedError
+  :show-inheritance:

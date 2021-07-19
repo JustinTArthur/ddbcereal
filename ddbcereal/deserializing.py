@@ -18,7 +18,7 @@ from fractions import Fraction
 from typing import (Any, ByteString, Callable, Mapping, MutableMapping,
                     Sequence, Union)
 
-from ddbcereal import NumberInexact
+from ddbcereal.exceptions import NumberInexactError
 from ddbcereal.types import PythonNumber
 
 DynamoDBTypeSymbol = str  # Literal['B', 'BOOL', 'BS', 'N', 'NS', 'S', 'SS', 'L', 'M', 'NULL']
@@ -113,7 +113,7 @@ def deserialize_number_as_exact_int(serial_value: DynamoDBSerialValue) -> int:
     try:
         return int(serial_value)
     except ValueError:
-        raise NumberInexact("Can't be represented exactly as an int.")
+        raise NumberInexactError("Can't be represented exactly as an int.")
 
 
 def deserialize_number_as_int(serial_value: DynamoDBSerialValue) -> int:

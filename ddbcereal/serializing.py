@@ -19,8 +19,8 @@ from datetime import datetime
 from fractions import Fraction
 from typing import Any, Callable, Mapping, MutableMapping, Union
 
-from ddbcereal.exceptions import (NumberInexact, NumberNotAllowed,
-                                  StringNotAllowed)
+from ddbcereal.exceptions import (NumberInexactError, NumberNotAllowedError,
+                                  StringNotAllowedError)
 from ddbcereal.types import DateFormat, DynamoDBType
 
 DynamoDBSerializable = Any
@@ -129,15 +129,15 @@ class Serializer:
                 'N': str(self._decimal_divide(value.numerator,
                                               value.denominator))}
         except decimal.Inexact:
-            raise NumberInexact()
+            raise NumberInexactError()
 
     def _serialize_number_strict(self, value: Union[int, float, decimal.Decimal]):
         try:
             dec_value = self._create_decimal(str(value))
         except decimal.Inexact:
-            raise NumberInexact()
+            raise NumberInexactError()
         if dec_value in (INFINITY, NAN):
-            raise NumberNotAllowed(f'{dec_value} not supported')
+            raise NumberNotAllowedError(f'{dec_value} not supported')
         return {'N': str(dec_value)}
 
     def _serialize_listlike(self, value: Union[list, tuple]):
@@ -168,7 +168,7 @@ def serialize_none(value: NoneType):
 
 
 def serialize_float_exact(value: float):
-    raise NumberInexact('Floats are inexact by nature.')
+    raise NumberInexactError('Floats are inexact by nature.')
 
 
 def serialize_any_as_string(value: Any):
@@ -181,7 +181,7 @@ def serialize_str(value: str):
 
 def serialize_str_strict(value: str):
     if not value:
-        raise StringNotAllowed('Empty string not allowed by DynamoDB.')
+        raise StringNotAllowedError('Empty string not allowed by DynamoDB.')
     return {'S': value}
 
 

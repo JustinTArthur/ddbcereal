@@ -13,11 +13,12 @@
 #  limitations under the License.
 
 from ddbcereal.deserializing import Deserializer
-from ddbcereal.exceptions import NumberInexact
+from ddbcereal.exceptions import (NumberInexactError, NumberNotAllowedError,
+                                  StringNotAllowedError)
 from ddbcereal.serializing import Serializer
 from ddbcereal.types import DateFormat, DynamoDBType, PythonNumber
 
-VERSION = 1, 0, 0
+VERSION = 1, 1, 0
 
 ISO_8601 = DateFormat.ISO_8601
 UNIX_MILLISECONDS = DateFormat.UNIX_MILLISECONDS
