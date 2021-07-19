@@ -131,9 +131,9 @@ Deserializer Options
 
 .. class:: Deserializer(self, \
                         allow_inexact=False, \
-                        python_number: PythonNumber = PythonNumber.DECIMAL_ONLY, \
-                        python_null_value: Any = None, \
-                        python_null_factory: Callable[[], Any] = None)
+                        number_type: PythonNumber = PythonNumber.DECIMAL_ONLY, \
+                        null_value: Any = None, \
+                        null_factory: Callable[[], Any] = None)
 
    :param bool allow_inexact: Whether to allow conversion to a Python number
       that won't exactly convey the value stored in DynamoDB (e.g. rounding of
@@ -143,8 +143,6 @@ Deserializer Options
    :param PythonNumber python_number: Determines how DynamoDB Numbers should be
       serialized. Possible enumerations are available on the ddbcereal top
       level module and the PythonNumber enum:
-
-      .. autoattribute:: ddbcereal.PythonNumber
 
       .. autoclass:: ddbcereal.PythonNumber
          :members:

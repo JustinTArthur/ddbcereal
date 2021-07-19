@@ -1,10 +1,14 @@
-.. ddbcereal documentation master file, created by
-   sphinx-quickstart on Sat Jul 17 21:11:18 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+ddbcereal
+=========
+Create a ``Serializer`` for getting data into the native DynamoDB format:
 
-Welcome to ddbcereal's documentation!
-=====================================
+* ``serializer.serialize(value)`` to serialize individual values
+* ``serializer.serialize_item(mapping)`` to serialize an entire dict of values.
+  
+Create ``Deserializer`` for getting native DynamoDB data into native Python values:
+
+* ``deserializer.deserialize(value)`` to deserialize individual values
+* ``deserializer.deserialize_item(mapping)`` for complete items from the AWS SDK
 
 .. toctree::
    :maxdepth: 2

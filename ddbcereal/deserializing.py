@@ -36,20 +36,20 @@ class Deserializer:
     def __init__(
         self,
         allow_inexact=False,
-        python_number: PythonNumber = PythonNumber.DECIMAL_ONLY,
-        python_null_value: Any = None,
-        python_null_factory: Callable[[], Any] = None
+        number_type: PythonNumber = PythonNumber.DECIMAL_ONLY,
+        null_value: Any = None,
+        null_factory: Callable[[], Any] = None
     ):
-        if python_number not in inexact_num_deserializers:
+        if number_type not in inexact_num_deserializers:
             raise ValueError('Unknown python_number technique.')
 
         if allow_inexact:
-            self._deserialize_number = inexact_num_deserializers[python_number]
-        elif python_number in exact_num_deserializers:
-            self._deserialize_number = exact_num_deserializers[python_number]
+            self._deserialize_number = inexact_num_deserializers[number_type]
+        elif number_type in exact_num_deserializers:
+            self._deserialize_number = exact_num_deserializers[number_type]
         else:
             raise ValueError(f'allow_inexact must be True to use '
-                             f'{python_number}')
+                             f'{number_type}')
 
         self._deserializers: MutableMapping[
             DynamoDBTypeSymbol,
@@ -62,7 +62,7 @@ class Deserializer:
             'M': self._deserialize_map,
             'N': self._deserialize_number,
             'NS': self._deserialize_number_set,
-            'NULL': python_null_factory or (lambda val: python_null_value),
+            'NULL': null_factory or (lambda val: null_value),
             'S': deserialize_string,
             'SS': deserialize_string_set,
         }

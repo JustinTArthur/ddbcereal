@@ -63,7 +63,7 @@ def test_map():
 
 
 def test_decimal_only():
-    deserializer = Deserializer(python_number=PythonNumber.DECIMAL_ONLY)
+    deserializer = Deserializer(number_type=PythonNumber.DECIMAL_ONLY)
     assert deserializer.deserialize(NUM_SMALL_INT) == Decimal('42')
     assert deserializer.deserialize(NUM_SMALL_NEG_INT) == Decimal('-42')
     assert deserializer.deserialize(NUM_SHORT_DECIMAL) == Decimal('1.1')
@@ -78,7 +78,7 @@ def test_decimal_only():
 def test_float_only():
     deserializer = Deserializer(
         allow_inexact=True,
-        python_number=PythonNumber.FLOAT_ONLY,
+        number_type=PythonNumber.FLOAT_ONLY,
     )
     assert deserializer.deserialize(NUM_SMALL_INT) == 42.0
     assert deserializer.deserialize(NUM_SMALL_NEG_INT) == -42.0
@@ -91,7 +91,7 @@ def test_float_only():
 
 def test_fraction_only():
     deserializer = Deserializer(
-        python_number=PythonNumber.FRACTION_ONLY
+        number_type=PythonNumber.FRACTION_ONLY
     )
     assert deserializer.deserialize(NUM_SMALL_INT) == Fraction('42')
     assert deserializer.deserialize(NUM_SMALL_NEG_INT) == Fraction('-42')
@@ -104,9 +104,9 @@ def test_fraction_only():
 
 
 def test_int_only():
-    exact = Deserializer(python_number=PythonNumber.INT_ONLY,
+    exact = Deserializer(number_type=PythonNumber.INT_ONLY,
                          allow_inexact=False)
-    inexact = Deserializer(python_number=PythonNumber.INT_ONLY,
+    inexact = Deserializer(number_type=PythonNumber.INT_ONLY,
                            allow_inexact=True)
 
     assert exact.deserialize(NUM_SMALL_INT) == 42
@@ -130,7 +130,7 @@ def test_int_only():
 
 
 def test_int_or_decimal():
-    deserializer = Deserializer(python_number=PythonNumber.INT_OR_DECIMAL)
+    deserializer = Deserializer(number_type=PythonNumber.INT_OR_DECIMAL)
     small_int = deserializer.deserialize(NUM_SMALL_INT)
     assert small_int == 42
     assert isinstance(small_int, int)
@@ -148,7 +148,7 @@ def test_int_or_decimal():
 def test_int_or_float():
     deserializer = Deserializer(
         allow_inexact=True,
-        python_number=PythonNumber.INT_OR_FLOAT
+        number_type=PythonNumber.INT_OR_FLOAT
     )
     small_int = deserializer.deserialize(NUM_SMALL_INT)
     assert small_int == 42
@@ -169,7 +169,7 @@ def test_int_or_float():
 def test_most_compact():
     deserializer = Deserializer(
         allow_inexact=True,
-        python_number=PythonNumber.MOST_COMPACT
+        number_type=PythonNumber.MOST_COMPACT
     )
     small_int = deserializer.deserialize(NUM_SMALL_INT)
     assert small_int == 42
