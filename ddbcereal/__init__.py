@@ -13,9 +13,9 @@
 #  limitations under the License.
 
 from ddbcereal.deserializing import Deserializer
+from ddbcereal.exceptions import NumberInexact
 from ddbcereal.serializing import Serializer
 from ddbcereal.types import DateFormat, DynamoDBType, PythonNumber
-from ddbcereal.exceptions import NumberInexact
 
 VERSION = 1, 0, 0
 

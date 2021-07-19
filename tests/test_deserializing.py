@@ -5,7 +5,6 @@ import pytest
 
 from ddbcereal.deserializing import Deserializer, PythonNumber
 
-
 NUM_SMALL_INT = {'N': '42'}
 NUM_SMALL_NEG_INT = {'N': '-42'}
 NUM_NTSC_FILM_APPROX = {'N': '23.976023976023976023976023976023976024'}

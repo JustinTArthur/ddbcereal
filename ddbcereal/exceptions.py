@@ -1,16 +1,8 @@
-class NumberRepresentationError(ValueError):
+class NumberInexact(ValueError):
     pass
 
 
-class NumberInexact(NumberRepresentationError):
-    pass
-
-
-class NumberRounded(NumberRepresentationError):
-    pass
-
-
-class NumberNotAllowed(NumberRepresentationError):
+class NumberNotAllowed(ValueError):
     pass
 
 

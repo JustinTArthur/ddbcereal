@@ -13,10 +13,12 @@
 #  limitations under the License.
 
 from collections.abc import Set
-from fractions import Fraction
-from typing import Any, Mapping, Union, ByteString, MutableMapping, Callable, Sequence
-
 from decimal import Decimal
+from fractions import Fraction
+from typing import (Any, ByteString, Callable, Mapping, MutableMapping,
+                    Sequence, Union)
+
+from ddbcereal import NumberInexact
 from ddbcereal.types import PythonNumber
 
 DynamoDBTypeSymbol = str  # Literal['B', 'BOOL', 'BS', 'N', 'NS', 'S', 'SS', 'L', 'M', 'NULL']
@@ -108,7 +110,10 @@ def deserialize_number_as_decimal(
 
 
 def deserialize_number_as_exact_int(serial_value: DynamoDBSerialValue) -> int:
-    return int(serial_value)
+    try:
+        return int(serial_value)
+    except ValueError:
+        raise NumberInexact("Can't be represented exactly as an int.")
 
 
 def deserialize_number_as_int(serial_value: DynamoDBSerialValue) -> int:

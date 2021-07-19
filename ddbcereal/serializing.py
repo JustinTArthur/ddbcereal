@@ -17,10 +17,11 @@ import fractions
 from collections.abc import Set
 from datetime import datetime
 from fractions import Fraction
-from typing import Any, Mapping, Union, MutableMapping, Callable
+from typing import Any, Callable, Mapping, MutableMapping, Union
 
-from ddbcereal.exceptions import NumberInexact, NumberNotAllowed, StringNotAllowed
-from ddbcereal.types import DynamoDBType, DateFormat
+from ddbcereal.exceptions import (NumberInexact, NumberNotAllowed,
+                                  StringNotAllowed)
+from ddbcereal.types import DateFormat, DynamoDBType
 
 DynamoDBSerializable = Any
 DynamoDBDeserializable = Mapping[str, Any]

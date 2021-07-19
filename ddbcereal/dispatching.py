@@ -1,4 +1,4 @@
-from typing import MutableMapping, Callable
+from typing import Callable, MutableMapping
 
 
 class TypedDispatchTable:
