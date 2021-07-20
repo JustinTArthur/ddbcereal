@@ -1,14 +1,14 @@
 ddbcereal
 =========
-Create a ``Serializer`` for getting data into the native DynamoDB format:
+A high performance Python library for serializing and deserializing DynamoDB
+attribute values.
 
-* ``serializer.serialize(value)`` to serialize individual values
-* ``serializer.serialize_item(mapping)`` to serialize an entire dict of values.
-  
-Create ``Deserializer`` for getting native DynamoDB data into native Python values:
+Serializers and deserializers created with ddbcereal work with the input and
+output of AWS SDKs like botocore, aiobotocore, and the low-level client
+interfaces of boto3 and aioboto3.
 
-* ``deserializer.deserialize(value)`` to deserialize individual values
-* ``deserializer.deserialize_item(mapping)`` for complete items from the AWS SDK
+This library endeavors to be at least as fast as boto3's (de)serializer and has
+the option to work with inexact numbers like floats.
 
 .. toctree::
    :maxdepth: 2

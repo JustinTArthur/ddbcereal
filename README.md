@@ -6,7 +6,7 @@ Serializers and deserializers created with ddbcereal work with the input and
 output of AWS SDKs like botocore, aiobotocore, and the low-level client
 interfaces of boto3 and aioboto3.
 
-This library strives to be at least as fast as boto3's (de)serializer and has
+This library endeavors to be at least as fast as boto3's (de)serializer and has
 the option to work with inexact numbers like floats.
 
 [Documentation](https://ddbcereal.readthedocs.io/)

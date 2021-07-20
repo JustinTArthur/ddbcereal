@@ -5,7 +5,3 @@ class NumberInexactError(ValueError):
 
 class NumberNotAllowedError(ValueError):
     """A supplied number can't be stored by DynamoDB."""
-
-
-class StringNotAllowedError(ValueError):
-    """Raised on an attempt to serialize a string not valid in DynamoDB."""

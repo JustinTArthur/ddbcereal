@@ -1,20 +1,61 @@
 Usage
 =====
 
+Installation
+------------
+ddbcereal is `hosted on PyPI <https://pypi.org/project/ddbcereal/>`_ so it's as
+simple as using your favorite installer:
+
+.. code-block:: bash
+
+    python -m pip install ddbcereal
+
+.. code-block:: bash
+
+    poetry add ddbcereal
+
+The package uses semantic versioning to indicate backwards
+compatible changes to the API.
+
 Communicating with DynamoDB
 ---------------------------
 ddbcereal does not transport data to or from DynamoDB. It's up to you to
-provide that layer. ddbcereal is known to work with these libraries:
+provide that layer. This is usually done with an AWS SDK or an HTTP
+library.
+
+AWS SDKs
+^^^^^^^^
+
+ddbcereal is known to work with these libraries:
 
 * aiobotocore
 * botocore
 * aioboto3's low-level interface
 * boto3's low-level interface
 
-ddbcereal assumes that JSON parsing and conversion of Base 64 data to bytes is
-handled already. All of the SDKs listed above do this.
-
 aiobotocore will be used for most examples in this documentation.
+
+Raw HTTP API
+^^^^^^^^^^^^
+
+ddbcereal can also work directly with the
+`DynamoDB HTTP API <https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Programming.LowLevelAPI.html>`_.
+Before and after JSON processing, dicts can be fed to
+:py:class:`Serializer`\ s and :py:class:`Deserializer`\ s constructed with
+``raw_transport=True``. 
+
+Basic Usage
+-----------
+Create a :py:class:`Serializer` to process data into the native DynamoDB format:
+
+* ``serializer.serialize(value)`` to serialize individual values
+* ``serializer.serialize_item(mapping)`` to serialize an entire dict of values.
+  
+Create :py:class:`Deserializer` for getting DynamoDB data into native Python
+values:
+
+* ``deserializer.deserialize(value)`` to deserialize individual values
+* ``deserializer.deserialize_item(mapping)`` for complete items from the AWS SDK
 
 Serialize Python Data for DynamoDB
 ----------------------------------
@@ -53,11 +94,9 @@ Serializer Options
 Serializers can be configured to handle data in different ways according to
 your needs.
 
-.. class:: Serializer(self, \
-                      allow_inexact=False, \
-                      nullify_empty_string=False, \
+.. class:: Serializer(allow_inexact=False, \
                       validate_numbers=True, \
-                      validate_strings=True, \
+                      raw_transport=False, \
                       datetime_format=ddbcereal.ISO_8601, \
                       fraction_type=ddbcereal.NUMBER)
 
@@ -65,9 +104,6 @@ your needs.
       be represented in DynamoDB or Python. DynamoDB's Number type stores exact
       numbers (fixed decimals). floats are considered inexact by their nature
       and are only accepted with this option enabled.
-
-   :param bool nullify_empty_string: When enabled, converts any ``""`` s to nulls
-      as a convenience. DynamoDB does not allow empty strings to be stored.
 
    :param bool validate_numbers: Whether to check inputted numbers to determine
       if they're valid for storage in DynamoDB and whether or not they conform
@@ -78,9 +114,9 @@ your needs.
       mistakes might only be caught after the serialized value has been sent
       to DynamoDB.
 
-   :param bool validate_strings: Raises a ``StringNotAllowedError`` on attempts
-      to serialize empty strings, which DynamoDB can't store. Disabling will
-      result in faster serialization.
+   :param bool raw_transport: Indicates that values have not been
+      pre-processed. For example, Base 64 strings have not been converted to
+      bytes. Use this when using the AWS HTTP API without an AWS SDK.
 
    :param DateFormat datetime_format: Determines how Python datetimes should be
       serialized. Possible enumerations are available on the ddbcereal top
@@ -129,8 +165,8 @@ attribute values as needed.
 Deserializer Options
 ^^^^^^^^^^^^^^^^^^^^
 
-.. class:: Deserializer(self, \
-                        allow_inexact=False, \
+.. class:: Deserializer(allow_inexact=False, \
+                        raw_transport=False, \
                         number_type: PythonNumber = PythonNumber.DECIMAL_ONLY, \
                         null_value: Any = None, \
                         null_factory: Callable[[], Any] = None)
@@ -139,6 +175,10 @@ Deserializer Options
       that won't exactly convey the value stored in DynamoDB (e.g. rounding of
       significant digits is required). Deserializing numbers to floats is only
       possible when this is enabled.
+
+   :param bool raw_transport: Indicates to deserialize values to be transported
+      without additional processing. Bytes will be transported as Base 64
+      strings. Use this when using the AWS HTTP API without an AWS SDK.
 
    :param PythonNumber python_number: Determines how DynamoDB Numbers should be
       serialized. Possible enumerations are available on the ddbcereal top
@@ -155,15 +195,25 @@ Deserializer Options
       DynamoDB Null value. The Null is converted to the return value of the
       function. ``python_null_value`` is ignored if this is supplied.
 
+Going Beyond the Basic Types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ddbcereal deserializers don't know the final shape you want your data to
+conform to. They find appropriate Python types for the few types of data that
+DynamoDB can store. If you want to deserialize values into more advanced types,
+consider using a marshalling library like marshmallow or Pydantic.
+
+They can take the dict produced by deserialize_item and create an object
+based on a schema, an object with fields of built-in types like dates, deques
+and of custom types.
+
+See
+:py:meth:`marshmallow.Schema.load` and
+`Pydantic Models - Helper Functions <https://pydantic-docs.helpmanual.io/usage/models/#helper-functions>`_.
+
 Exceptions
 ----------
-.. versionadded:: 1.1.0
-
 .. autoexception:: ddbcereal.NumberInexactError
   :show-inheritance:
 
 .. autoexception:: ddbcereal.NumberNotAllowedError
-  :show-inheritance:
-
-.. autoexception:: ddbcereal.StringNotAllowedError
   :show-inheritance:

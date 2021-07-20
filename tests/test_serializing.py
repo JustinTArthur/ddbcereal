@@ -30,10 +30,9 @@ def test_decimals():
 
 def test_strs():
     serializer = Serializer()
+    assert serializer.serialize('') == {'S': ''}
     assert serializer.serialize('9873') == {'S': '9873'}
     assert serializer.serialize('abc def') == {'S': 'abc def'}
-    nullify_serializer = Serializer(nullify_empty_string=True)
-    assert nullify_serializer.serialize('') == {'NULL': True}
 
 
 def test_number_validation():
@@ -81,10 +80,20 @@ def test_fractions():
     assert string_serializer.serialize(ntsc_film_rate) == {'S': '24000/1001'}
 
 
-
 def test_none():
     serializer = Serializer()
     return serializer.serialize(None) == {'NULL': True}
+
+
+def test_bytes():
+    serializer = Serializer()
+    raw_serializer = Serializer(raw_transport=True)
+
+    assert serializer.serialize(b'') == {'B': b''}
+    assert raw_serializer.serialize(b'') == {'B': ''}
+
+    assert serializer.serialize(b'test') == {'B': b'test'}
+    assert raw_serializer.serialize(b'test') == {'B': 'dGVzdA=='}
 
 
 def test_bools():
@@ -132,3 +141,14 @@ def test_maps():
         }
     }
 
+def test_item():
+    serializer = Serializer()
+    assert serializer.serialize_item({
+        'this': 'that',
+        'another': 123,
+        'level2': {'isTrue': True}
+    }) == {
+        'this': {'S': 'that'},
+        'another': {'N': '123'},
+        'level2': {'M': {'isTrue': {'BOOL': True}}}
+    }

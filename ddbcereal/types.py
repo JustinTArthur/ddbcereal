@@ -13,12 +13,14 @@
 #  limitations under the License.
 
 import enum
+from collections.abc import Mapping
+from typing import Sequence, Union
 
 
 class DateFormat(enum.Enum):
     UNIX_SECONDS = enum.auto()
-    """DynamoDB Number holding number of seconds since the Unix epoch. This
-    is the only date/time format that can used as a TTL field for automatic item
+    """DynamoDB Number holding number of seconds since the Unix epoch. This is
+    the only date/time format that can used as a TTL field for automatic item
     expiration in DynamoDB."""
 
     UNIX_MILLISECONDS = enum.auto()
@@ -60,3 +62,16 @@ class PythonNumber(enum.Enum):
     """Use int if the Number is whole, use float if a float's decimal
     character representation matches the number, otherwise use a
     decimal.Decimal."""
+
+
+DynamoDBTypeSymbol = str
+DynamoDBSerialValue = Union[
+    bool,
+    bytes,
+    Mapping,
+    Sequence[str],
+    Sequence[bytes],
+    Sequence[Mapping],
+    str
+]
+DynamoDBValue = Mapping[DynamoDBTypeSymbol, DynamoDBSerialValue]

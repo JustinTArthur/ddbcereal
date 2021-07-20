@@ -12,35 +12,26 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+from base64 import b64decode
 from collections.abc import Set
 from decimal import Decimal
 from fractions import Fraction
 from typing import (Any, ByteString, Callable, Mapping, MutableMapping,
-                    Sequence, Union)
+                    Optional, Sequence, Union)
 
 from ddbcereal.exceptions import NumberInexactError
-from ddbcereal.types import PythonNumber
-
-DynamoDBTypeSymbol = str  # Literal['B', 'BOOL', 'BS', 'N', 'NS', 'S', 'SS', 'L', 'M', 'NULL']
-DynamoDBSerialValue = Union[
-    bool,
-    bytes,
-    Mapping,
-    Sequence[str],
-    Sequence[bytes],
-    Sequence[Mapping],
-    str
-]
-DynamoDBValue = Mapping[DynamoDBTypeSymbol, DynamoDBSerialValue]
+from ddbcereal.types import (DynamoDBSerialValue, DynamoDBTypeSymbol,
+                             DynamoDBValue, PythonNumber)
 
 
 class Deserializer:
     def __init__(
         self,
         allow_inexact=False,
+        raw_transport=False,
         number_type: PythonNumber = PythonNumber.DECIMAL_ONLY,
         null_value: Any = None,
-        null_factory: Callable[[], Any] = None
+        null_factory: Optional[Callable[[], Any]] = None
     ):
         if number_type not in inexact_num_deserializers:
             raise ValueError('Unknown python_number technique.')
@@ -53,18 +44,30 @@ class Deserializer:
             raise ValueError(f'allow_inexact must be True to use '
                              f'{number_type}')
 
-        self._deserializers: MutableMapping[
-            DynamoDBTypeSymbol,
-            Callable[[DynamoDBSerialValue], ...]
-        ] = {
-            'B': deserialize_binary,
-            'BS': deserialize_binary_set,
+        _deserialize_binary: Callable
+        if raw_transport:
+            _deserialize_binary = deserialize_binary_raw
+            _deserialize_binary_set = deserialize_binary_set_raw
+        else:
+            _deserialize_binary = deserialize_binary
+            _deserialize_binary_set = deserialize_binary_set
+
+        if null_factory:
+            def deserialize_null(serial_value):
+                return null_factory()
+        else:
+            def deserialize_null(serial_value):
+                return null_value
+
+        self._deserializers: MutableMapping[DynamoDBTypeSymbol, Callable] = {
+            'B': _deserialize_binary,
+            'BS': _deserialize_binary_set,
             'BOOL': deserialize_bool,
             'L': self._deserialize_list,
             'M': self._deserialize_map,
             'N': self._deserialize_number,
             'NS': self._deserialize_number_set,
-            'NULL': null_factory or (lambda val: null_value),
+            'NULL': deserialize_null,
             'S': deserialize_string,
             'SS': deserialize_string_set,
         }
@@ -73,69 +76,83 @@ class Deserializer:
         (type_symbol, serial_value), = value.items()
         return self._deserializers[type_symbol](serial_value)
 
-    def deserialize_item(self, item):
+    def deserialize_item(self, item: Mapping[str, DynamoDBValue]) -> Mapping:
         return {
             k: self.deserialize(v) for k, v in item.items()
         }
 
     def _deserialize_number_set(
         self,
-        serial_value: DynamoDBSerialValue
+        serial_value: Sequence[str]
     ) -> Set:
         return {self._deserialize_number(n) for n in serial_value}
 
-    def _deserialize_list(self, serial_value: DynamoDBSerialValue) -> Sequence:
+    def _deserialize_list(
+        self,
+        serial_value: Sequence[DynamoDBValue]
+    ) -> Sequence:
         return [self.deserialize(val) for val in serial_value]
 
-    def _deserialize_map(self, serial_value: DynamoDBSerialValue) -> Mapping:
+    def _deserialize_map(
+        self,
+        serial_value: Mapping[str, DynamoDBValue]
+    ) -> Mapping:
         return {k: self.deserialize(v) for k, v in serial_value.items()}
 
 
-def deserialize_binary(serial_value: DynamoDBSerialValue) -> ByteString:
+def deserialize_binary(serial_value: Union[bytes, memoryview]) -> ByteString:
     return serial_value
 
 
-def deserialize_binary_set(serial_value: DynamoDBSerialValue) -> Set:
+def deserialize_binary_raw(serial_value: str) -> ByteString:
+    return b64decode(serial_value)
+
+
+def deserialize_binary_set(serial_value: Sequence[DynamoDBSerialValue]) -> Set:
     return {val for val in serial_value}
 
 
-def deserialize_bool(serial_value: DynamoDBSerialValue) -> bool:
+def deserialize_binary_set_raw(serial_value: Sequence[str]) -> Set:
+    return {b64decode(val) for val in serial_value}
+
+
+def deserialize_bool(serial_value: bool) -> bool:
     return serial_value
 
 
 def deserialize_number_as_decimal(
-    serial_value: DynamoDBSerialValue
+    serial_value: str
 ) -> Decimal:
     return Decimal(serial_value)
 
 
-def deserialize_number_as_exact_int(serial_value: DynamoDBSerialValue) -> int:
+def deserialize_number_as_exact_int(serial_value: str) -> int:
     try:
         return int(serial_value)
     except ValueError:
         raise NumberInexactError("Can't be represented exactly as an int.")
 
 
-def deserialize_number_as_int(serial_value: DynamoDBSerialValue) -> int:
+def deserialize_number_as_int(serial_value: str) -> int:
     try:
         return int(serial_value)
     except ValueError:
         return round(Decimal(serial_value))
 
 
-def deserialize_number_as_float(serial_value: DynamoDBSerialValue) -> float:
+def deserialize_number_as_float(serial_value: str) -> float:
     return float(serial_value)
 
 
 def deserialize_number_as_fraction(
-    serial_value: DynamoDBSerialValue
+    serial_value: str
 ) -> Fraction:
     decimal_value = deserialize_number_as_decimal(serial_value)
     return Fraction(*decimal_value.as_integer_ratio())
 
 
 def deserialize_number_as_most_compact(
-    serial_value: DynamoDBSerialValue
+    serial_value: str
 ) -> Union[int, float, Decimal]:
     try:
         return int(serial_value)
@@ -148,25 +165,27 @@ def deserialize_number_as_most_compact(
     return Decimal(serial_value)
 
 
-def deserialize_number_as_int_or_decimal(serial_value: DynamoDBSerialValue):
+def deserialize_number_as_int_or_decimal(
+    serial_value: str
+) -> Union[int, Decimal]:
     try:
         return int(serial_value)
     except ValueError:
         return Decimal(serial_value)
 
 
-def deserialize_number_as_int_or_float(serial_value: DynamoDBSerialValue):
+def deserialize_number_as_int_or_float(serial_value: str):
     try:
         return int(serial_value)
     except ValueError:
         return float(serial_value)
 
 
-def deserialize_string(serial_value: DynamoDBSerialValue) -> str:
+def deserialize_string(serial_value: str) -> str:
     return serial_value
 
 
-def deserialize_string_set(serial_value: DynamoDBSerialValue) -> Set:
+def deserialize_string_set(serial_value: Sequence[str]) -> Set:
     return {val for val in serial_value}
 
 

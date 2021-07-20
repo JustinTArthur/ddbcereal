@@ -13,12 +13,11 @@
 #  limitations under the License.
 
 from ddbcereal.deserializing import Deserializer
-from ddbcereal.exceptions import (NumberInexactError, NumberNotAllowedError,
-                                  StringNotAllowedError)
+from ddbcereal.exceptions import NumberInexactError, NumberNotAllowedError
 from ddbcereal.serializing import Serializer
 from ddbcereal.types import DateFormat, DynamoDBType, PythonNumber
 
-VERSION = 1, 1, 0
+VERSION = 2, 0, 0
 
 ISO_8601 = DateFormat.ISO_8601
 UNIX_MILLISECONDS = DateFormat.UNIX_MILLISECONDS
@@ -30,6 +29,12 @@ STRING = DynamoDBType.STRING
 DECIMAL_ONLY = PythonNumber.DECIMAL_ONLY
 FRACTION_ONLY = PythonNumber.FRACTION_ONLY
 INT_ONLY = PythonNumber.INT_ONLY
-INT_OR_FLOAT = PythonNumber.INT_OR_FLOAT
 INT_OR_DECIMAL = PythonNumber.INT_OR_DECIMAL
+INT_OR_FLOAT = PythonNumber.INT_OR_FLOAT
 MOST_COMPACT = PythonNumber.MOST_COMPACT
+
+__all__ = ('DateFormat', 'DECIMAL_ONLY', 'Deserializer', 'DynamoDBType',
+           'FRACTION_ONLY', 'INT_ONLY', 'INT_OR_DECIMAL', 'INT_OR_FLOAT',
+           'ISO_8601', 'MOST_COMPACT', 'NUMBER', 'NumberInexactError',
+           'NumberNotAllowedError', 'PythonNumber', 'Serializer', 'STRING',
+           'UNIX_MILLISECONDS', 'UNIX_SECONDS', 'VERSION')

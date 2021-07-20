@@ -34,8 +34,7 @@ MIXED_DICT_2_LVL = {
 boto3_serializer = Boto3Serializer()
 ddbcereal_serializer = DDBCerealSerializer(allow_inexact=False)
 ddbcereal_nonvalidating = DDBCerealSerializer(
-    validate_numbers=False,
-    validate_strings=False
+    validate_numbers=False
 )
 
 

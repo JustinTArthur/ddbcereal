@@ -14,17 +14,15 @@
 
 import decimal
 import fractions
-from collections.abc import Set
+from base64 import b64encode
+from collections.abc import ByteString, Set
 from datetime import datetime
 from fractions import Fraction
 from typing import Any, Callable, Mapping, MutableMapping, Union
 
-from ddbcereal.exceptions import (NumberInexactError, NumberNotAllowedError,
-                                  StringNotAllowedError)
-from ddbcereal.types import DateFormat, DynamoDBType
+from ddbcereal.exceptions import NumberInexactError, NumberNotAllowedError
+from ddbcereal.types import DateFormat, DynamoDBType, DynamoDBValue
 
-DynamoDBSerializable = Any
-DynamoDBDeserializable = Mapping[str, Any]
 NoneType = type(None)
 
 
@@ -44,35 +42,23 @@ class Serializer:
     def __init__(
         self,
         allow_inexact=False,
-        nullify_empty_string=False,
         validate_numbers=True,
-        validate_strings=True,
+        raw_transport=False,
         datetime_format=DateFormat.ISO_8601,
-        fraction_type=DynamoDBType.NUMBER
+        fraction_type=DynamoDBType.NUMBER,
     ):
         decimal_traps = [
             decimal.Clamped,
             decimal.Overflow,
             decimal.Underflow
         ]
+        if not allow_inexact:
+            decimal_traps.append(decimal.Inexact)
 
-        self._type_methods: MutableMapping[type, Callable] = {
-            bool: serialize_bool,
-            datetime: date_serializers[datetime_format],
-            dict: self._serialize_mapping,
-            list: self._serialize_listlike,
-            Mapping: self._serialize_mapping,
-            NoneType: serialize_none,
-            tuple: self._serialize_listlike,
-            frozenset: self._serialize_set,
-            set: self._serialize_set
-        }
-        if nullify_empty_string:
-            self._type_methods[str] = serialize_str_nullify_empty
-        elif validate_strings:
-            self._type_methods[str] = serialize_str_strict
+        if raw_transport:
+            _serialize_bytes = serialize_bytes_raw
         else:
-            self._type_methods[str] = serialize_str
+            _serialize_bytes = serialize_bytes
 
         if validate_numbers:
             serialize_num = self._serialize_number_strict
@@ -80,19 +66,29 @@ class Serializer:
             serialize_num = serialize_number
         self._serialize_num = serialize_num
 
+        self._type_methods: MutableMapping[type, Callable] = {
+            bool: serialize_bool,
+            bytes: _serialize_bytes,
+            bytearray: _serialize_bytes,
+            memoryview: _serialize_bytes,
+            datetime: date_serializers[datetime_format],
+            decimal.Decimal: serialize_num,
+            dict: self._serialize_mapping,
+            float: serialize_num if allow_inexact else serialize_float_exact,
+            int: serialize_num,
+            list: self._serialize_listlike,
+            Mapping: self._serialize_mapping,
+            NoneType: serialize_none,
+            tuple: self._serialize_listlike,
+            frozenset: self._serialize_set,
+            set: self._serialize_set,
+            str: serialize_str,
+        }
+
         if fraction_type == DynamoDBType.NUMBER:
             self._type_methods[Fraction] = self._serialize_fraction_as_number
         else:
             self._type_methods[Fraction] = serialize_any_as_string
-
-        self._type_methods[int] = serialize_num
-        self._type_methods[decimal.Decimal] = serialize_num
-
-        if allow_inexact:
-            self._type_methods[float] = serialize_num
-        else:
-            self._type_methods[float] = serialize_float_exact
-            decimal_traps.append(decimal.Inexact) 
 
         decimal_ctx = decimal.Context(
             Emin=DDB_NUMBER_EMIN,
@@ -104,7 +100,7 @@ class Serializer:
         self._create_decimal = decimal_ctx.create_decimal
         self._decimal_divide = decimal_ctx.divide
 
-    def serialize(self, value: Any) -> DynamoDBDeserializable:
+    def serialize(self, value: Any) -> DynamoDBValue:
         value_type = type(value)
         try:
             method = self._type_methods[value_type]
@@ -119,9 +115,9 @@ class Serializer:
 
     def serialize_item(
         self,
-        item: Mapping[str, any]
-    ) -> Mapping[str, DynamoDBDeserializable]:
-        return {k: self.serialize(v) for k, v in item}
+        item: Mapping[str, Any]
+    ) -> Mapping[str, DynamoDBValue]:
+        return {k: self.serialize(v) for k, v in item.items()}
 
     def _serialize_fraction_as_number(self, value: Fraction):
         try:
@@ -131,7 +127,10 @@ class Serializer:
         except decimal.Inexact:
             raise NumberInexactError()
 
-    def _serialize_number_strict(self, value: Union[int, float, decimal.Decimal]):
+    def _serialize_number_strict(
+        self,
+        value: Union[int, float, decimal.Decimal]
+    ):
         try:
             dec_value = self._create_decimal(str(value))
         except decimal.Inexact:
@@ -143,11 +142,25 @@ class Serializer:
     def _serialize_listlike(self, value: Union[list, tuple]):
         return {'L': [self.serialize(element) for element in value]}
 
-    def _serialize_set(self, value: Set): 
+    def _serialize_set(self, value: Set):
         if all(isinstance(element, str) for element in value):
             return {'SS': [element for element in value]}
         if all(isinstance(element, NUMBER_TYPES) for element in value):
-            return {'NS': [val for element in value for val in self.serialize(element).values()]}
+            return {
+                'NS': [
+                    val
+                    for element in value
+                    for val in self.serialize(element).values()
+                ]
+            }
+        if all(isinstance(element, ByteString) for element in value):
+            return {
+                'BS': [
+                    val
+                    for element in value
+                    for val in self.serialize(element).values()
+                ]
+            }
 
     def _serialize_mapping(self, value: Mapping):
         return {
@@ -157,6 +170,14 @@ class Serializer:
 
 def serialize_bool(value: bool):
     return {'BOOL': value}
+
+
+def serialize_bytes(value: ByteString):
+    return {'B': value}
+
+
+def serialize_bytes_raw(value: Union[bytes, memoryview]):
+    return {'B': b64encode(value).decode('ascii')}
 
 
 def serialize_number(value):
@@ -176,18 +197,6 @@ def serialize_any_as_string(value: Any):
 
 
 def serialize_str(value: str):
-    return {'S': value}
-
-
-def serialize_str_strict(value: str):
-    if not value:
-        raise StringNotAllowedError('Empty string not allowed by DynamoDB.')
-    return {'S': value}
-
-
-def serialize_str_nullify_empty(value: str):
-    if not value:
-        return {'NULL': True}
     return {'S': value}
 
 

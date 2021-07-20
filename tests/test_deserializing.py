@@ -27,6 +27,26 @@ def test_basic_types():
     ) == [None, 'Hello']
 
 
+def test_binary():
+    deserializer = Deserializer()
+    raw_deserializer = Deserializer(raw_transport=True)
+    assert deserializer.deserialize({'B': b''}) == b''
+    assert raw_deserializer.deserialize({'B': ''}) == b''
+
+    assert deserializer.deserialize({'B': b'test'}) == b'test'
+    assert raw_deserializer.deserialize({'B': 'dGVzdA=='})
+
+
+def test_item():
+    deserializer = Deserializer()
+    assert deserializer.deserialize_item(
+        {
+            'key1': {'NULL': True},
+            'key2': {'S': 'Hello'}
+        }
+    ) == {'key1': None, 'key2': 'Hello'}
+
+
 def test_map():
     deserializer = Deserializer()
     assert deserializer.deserialize(
