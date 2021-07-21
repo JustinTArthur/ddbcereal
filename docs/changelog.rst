@@ -1,5 +1,9 @@
 Changelog
 =========
+2.0.1
+-----
+* Fix exceptions from typing on pre-3.9 Python
+
 2.0.0
 -----
 * Remove ``nullify_empty_string`` and ``validate_strings`` options. DynamoDB

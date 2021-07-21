@@ -17,7 +17,7 @@ from ddbcereal.exceptions import NumberInexactError, NumberNotAllowedError
 from ddbcereal.serializing import Serializer
 from ddbcereal.types import DateFormat, DynamoDBType, PythonNumber
 
-VERSION = 2, 0, 0
+VERSION = 2, 0, 1
 
 ISO_8601 = DateFormat.ISO_8601
 UNIX_MILLISECONDS = DateFormat.UNIX_MILLISECONDS

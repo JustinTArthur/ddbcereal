@@ -13,8 +13,7 @@
 #  limitations under the License.
 
 import enum
-from collections.abc import Mapping
-from typing import Sequence, Union
+from typing import Mapping, Sequence, Union
 
 
 class DateFormat(enum.Enum):
