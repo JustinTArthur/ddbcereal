@@ -17,14 +17,17 @@ from ddbcereal.exceptions import NumberInexactError, NumberNotAllowedError
 from ddbcereal.serializing import Serializer
 from ddbcereal.types import DateFormat, DynamoDBType, PythonNumber
 
-VERSION = 2, 0, 1
+VERSION = 2, 1, 0
 
 ISO_8601 = DateFormat.ISO_8601
 UNIX_MILLISECONDS = DateFormat.UNIX_MILLISECONDS
 UNIX_SECONDS = DateFormat.UNIX_SECONDS
 
+BINARY_SET = DynamoDBType.BINARY_SET
 NUMBER = DynamoDBType.NUMBER
+NUMBER_SET = DynamoDBType.NUMBER_SET
 STRING = DynamoDBType.STRING
+STRING_SET = DynamoDBType.STRING_SET
 
 DECIMAL_ONLY = PythonNumber.DECIMAL_ONLY
 FRACTION_ONLY = PythonNumber.FRACTION_ONLY

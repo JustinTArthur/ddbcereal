@@ -98,11 +98,12 @@ your needs.
                       validate_numbers=True, \
                       raw_transport=False, \
                       datetime_format=ddbcereal.ISO_8601, \
-                      fraction_type=ddbcereal.NUMBER)
+                      fraction_type=ddbcereal.NUMBER, \
+                      empty_set_type=ddbcereal.NUMBER_SET)
 
    :param bool allow_inexact: Whether to allow numbers whose exact value can't
       be represented in DynamoDB or Python. DynamoDB's Number type stores exact
-      numbers (fixed decimals). floats are considered inexact by their nature
+      numbers (fixed decimals). ``float``\ s are considered inexact by their nature
       and are only accepted with this option enabled.
 
    :param bool validate_numbers: Whether to check inputted numbers to determine
@@ -110,28 +111,40 @@ your needs.
       to the ``allow_inexact`` parameter.
 
       When enabled, attempts to serialize invalid numbers will result in a
-      ``ValueError`` being raised. When disabled, serialization is faster, but
-      mistakes might only be caught after the serialized value has been sent
-      to DynamoDB.
+      :py:exc:`ValueError` being raised. When disabled, serialization is
+      faster, but mistakes might only be caught after the serialized value has
+      been sent to DynamoDB.
 
    :param bool raw_transport: Indicates that values have not been
       pre-processed. For example, Base 64 strings have not been converted to
       bytes. Use this when using the AWS HTTP API without an AWS SDK.
 
-   :param DateFormat datetime_format: Determines how Python datetimes should be
-      serialized. Possible enumerations are available on the ddbcereal top
-      level module and the DateFormat enum:
+   :param DateFormat datetime_format: Determines how Python
+      :py:class:`~datetime.datetime`\ s should be serialized. Possible
+      enumerations are available on the ddbcereal top level module and the
+      :py:class:`~ddbcereal.DateFormat` enum.
 
-      .. autoclass:: ddbcereal.DateFormat
-         :members:
+   :param DynamoDBType fraction_type: Determines how Python
+      :py:class:`~fractions.Fraction`\ s should be serialized. Must be
+      :py:attr:`~ddbcereal.DynamoDBType.NUMBER` or
+      :py:attr:`~ddbcereal.DynamoDBType.STRING`. Enumerations are available on
+      the ddbcereal top level module and the
+      :py:class:`~ddbcereal.DynamoDBType` enum. 
 
-   :param DynamoDBType fraction_type: Determines how Python ``Fraction`` s should
-      be serialized. Possible enumerations are available on the ddbcereal top
-      level module and the DynamoDBType enum: 
+   :param DynamoDBType empty_set_type: When an empty set is serialized, make
+      the set this DynamoDB type. Must be
+      :py:attr:`~ddbcereal.DynamoDBType.NUMBER_SET`,
+      :py:attr:`~ddbcereal.DynamoDBType.STRING_SET`, or
+      :py:attr:`~ddbcereal.DynamoDBType.BINARY_SET`. Enumerations are available
+      on the ddbcereal top level module and the
+      :py:class:`~ddbcereal.DynamoDBType` enum.
 
-      .. autoclass:: ddbcereal.DynamoDBType
-         :members:
-         :undoc-members:
+.. autoclass:: ddbcereal.DateFormat
+   :members:
+
+.. autoclass:: ddbcereal.DynamoDBType
+   :members:
+   :undoc-members:
 
 Deserialize DynamoDB Data into Python
 -------------------------------------
@@ -173,8 +186,8 @@ Deserializer Options
 
    :param bool allow_inexact: Whether to allow conversion to a Python number
       that won't exactly convey the value stored in DynamoDB (e.g. rounding of
-      significant digits is required). Deserializing numbers to floats is only
-      possible when this is enabled.
+      significant digits is required). Deserializing numbers to ``float``\ s is
+      only possible when this is enabled.
 
    :param bool raw_transport: Indicates to deserialize values to be transported
       without additional processing. Bytes will be transported as Base 64
@@ -182,14 +195,14 @@ Deserializer Options
 
    :param PythonNumber python_number: Determines how DynamoDB Numbers should be
       serialized. Possible enumerations are available on the ddbcereal top
-      level module and the PythonNumber enum:
+      level module and the :py:class:`PythonNumber` enum:
 
       .. autoclass:: ddbcereal.PythonNumber
          :members:
 
    :param python_null_value: The Python value to convert DynamoDB Nulls to.
-      Defaults to ``None``. An immutable value is recommended. Ignored if
-      ``python_null_factory`` is supplied.
+      Defaults to :py:class:`None`. An immutable value is recommended. Ignored
+      if ``python_null_factory`` is supplied.
 
    :param Callable[[], Any] python_null_factory: A function invoked for every
       DynamoDB Null value. The Null is converted to the return value of the
@@ -202,9 +215,9 @@ conform to. They find appropriate Python types for the few types of data that
 DynamoDB can store. If you want to deserialize values into more advanced types,
 consider using a marshalling library like marshmallow or Pydantic.
 
-They can take the dict produced by deserialize_item and create an object
-based on a schema, an object with fields of built-in types like dates, deques
-and of custom types.
+They can take the dict produced by deserialize_item and create an objec based
+on a schema, an object with fields of built-in types like dates, deques and of
+custom types.
 
 See
 :py:meth:`marshmallow.Schema.load` and

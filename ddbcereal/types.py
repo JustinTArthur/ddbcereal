@@ -31,8 +31,11 @@ class DateFormat(enum.Enum):
 
 
 class DynamoDBType(enum.Enum):
-    NUMBER = enum.auto()
-    STRING = enum.auto()
+    NUMBER = 'N'
+    NUMBER_SET = 'NS'
+    STRING = 'S'
+    STRING_SET = 'SS'
+    BINARY_SET = 'BS'
 
 
 class PythonNumber(enum.Enum):

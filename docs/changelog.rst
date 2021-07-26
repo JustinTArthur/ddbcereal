@@ -1,5 +1,12 @@
 Changelog
 =========
+2.1.0
+-----
+* Empty Python set is now serialized to a configurable Set type.
+* Faster serialization for Number Sets and Binary Sets.
+* Behind the scenes, DynamoDBType enumerations are now ``str``\ s of
+  their type symbol.
+
 2.0.1
 -----
 * Fix exceptions from typing on pre-3.9 Python
