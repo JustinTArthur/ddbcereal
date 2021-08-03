@@ -1,5 +1,9 @@
 Changelog
 =========
+Upcoming
+--------
+* Faster Binary (de)serialization in raw transport mode.
+
 2.1.0
 -----
 * Empty Python set is now serialized to a configurable Set type.

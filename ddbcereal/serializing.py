@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import decimal
-from base64 import b64encode
+from binascii import b2a_base64
 from collections.abc import ByteString, Set
 from datetime import datetime
 from fractions import Fraction
@@ -191,7 +191,7 @@ def serialize_bytes(value: ByteString):
 
 
 def serialize_bytes_raw(value: Union[bytes, memoryview]):
-    return {'B': b64encode(value).decode('ascii')}
+    return {'B': b2a_base64(value, newline=False).decode('ascii')}
 
 
 def serialize_number(value):

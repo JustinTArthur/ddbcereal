@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from base64 import b64decode
+from binascii import a2b_base64
 from collections.abc import Set
 from decimal import Decimal
 from fractions import Fraction
@@ -105,7 +105,7 @@ def deserialize_binary(serial_value: Union[bytes, memoryview]) -> ByteString:
 
 
 def deserialize_binary_raw(serial_value: str) -> ByteString:
-    return b64decode(serial_value)
+    return a2b_base64(serial_value)
 
 
 def deserialize_binary_set(serial_value: Sequence[DynamoDBSerialValue]) -> Set:
@@ -113,7 +113,7 @@ def deserialize_binary_set(serial_value: Sequence[DynamoDBSerialValue]) -> Set:
 
 
 def deserialize_binary_set_raw(serial_value: Sequence[str]) -> Set:
-    return {b64decode(val) for val in serial_value}
+    return {a2b_base64(val) for val in serial_value}
 
 
 def deserialize_bool(serial_value: bool) -> bool:
