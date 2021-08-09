@@ -36,6 +36,33 @@ Known Limitations
 
 Benchmarks
 ----------
+
+.. list-table:: Deserializer Benchmarks (ddbcereal 2.1.0 cpython 3.9.4, 3.1 GHz
+                Intel Core i7)
+   :widths: 25 25
+   :header-rows: 1
+
+   * - Operation
+     - Default Options Compared to boto3
+   * - Construct a Deserializer, default options
+     - 25x Slower
+   * - Number to Decimal
+     - 1.8x faster
+   * - Integer Number to Decimal
+     - 1.9x faster
+   * - String to str
+     - 1.7x faster
+   * - Number Set to Decimal Set 
+     - 1.1x faster
+   * - String Set to set[str]
+     - 1.9x faster
+   * - List of mixed types to List
+     - 1.8x faster
+   * - dict of mixed types to Map
+     - 1.9x faster
+   * - dict of 2 levels to Map
+     - 1.8x faster
+
 .. list-table:: Serializer Benchmarks (ddbcereal 2.1.0 cpython 3.9.4, 3.1 GHz
                 Intel Core i7)
    :widths: 25 25 50
