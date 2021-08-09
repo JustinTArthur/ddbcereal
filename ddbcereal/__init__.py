@@ -30,6 +30,7 @@ STRING = DynamoDBType.STRING
 STRING_SET = DynamoDBType.STRING_SET
 
 DECIMAL_ONLY = PythonNumber.DECIMAL_ONLY
+FLOAT_ONLY = PythonNumber.FLOAT_ONLY
 FRACTION_ONLY = PythonNumber.FRACTION_ONLY
 INT_ONLY = PythonNumber.INT_ONLY
 INT_OR_DECIMAL = PythonNumber.INT_OR_DECIMAL
@@ -37,7 +38,8 @@ INT_OR_FLOAT = PythonNumber.INT_OR_FLOAT
 MOST_COMPACT = PythonNumber.MOST_COMPACT
 
 __all__ = ('DateFormat', 'DECIMAL_ONLY', 'Deserializer', 'DynamoDBType',
-           'FRACTION_ONLY', 'INT_ONLY', 'INT_OR_DECIMAL', 'INT_OR_FLOAT',
-           'ISO_8601', 'MOST_COMPACT', 'NUMBER', 'NumberInexactError',
-           'NumberNotAllowedError', 'PythonNumber', 'Serializer', 'STRING',
-           'UNIX_MILLISECONDS', 'UNIX_SECONDS', 'VERSION')
+           'FLOAT_ONLY', 'FRACTION_ONLY', 'INT_ONLY', 'INT_OR_DECIMAL',
+           'INT_OR_FLOAT', 'ISO_8601', 'MOST_COMPACT', 'NUMBER',
+           'NumberInexactError', 'NumberNotAllowedError', 'PythonNumber',
+           'Serializer', 'STRING', 'UNIX_MILLISECONDS', 'UNIX_SECONDS',
+           'VERSION')

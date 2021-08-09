@@ -3,6 +3,7 @@ Changelog
 Upcoming
 --------
 * Faster Binary (de)serialization in raw transport mode.
+* Expose `ddbcereal.FLOAT_ONLY`
 
 2.1.0
 -----
