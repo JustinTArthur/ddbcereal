@@ -32,7 +32,7 @@ class Deserializer:
         number_type: PythonNumber = PythonNumber.DECIMAL_ONLY,
         null_value: Any = None,
         null_factory: Optional[Callable[[], Any]] = None
-    ):
+    ) -> None:
         if number_type not in inexact_num_deserializers:
             raise ValueError('Unknown python_number technique.')
 

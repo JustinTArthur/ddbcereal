@@ -1,8 +1,9 @@
 Changelog
 =========
-Upcoming
+2.1.1
 --------
 * Faster Binary (de)serialization in raw transport mode.
+* Fix main constructor strict type checking for referring projects.
 * Expose `ddbcereal.FLOAT_ONLY`
 
 2.1.0

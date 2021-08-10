@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 import enum
-from typing import Mapping, Sequence, Union
+from typing import Mapping, Sequence, Union, Any
 
 
 class DateFormat(enum.Enum):
@@ -70,10 +70,10 @@ DynamoDBTypeSymbol = str
 DynamoDBSerialValue = Union[
     bool,
     bytes,
-    Mapping,
+    Mapping[str, Any],
     Sequence[str],
     Sequence[bytes],
-    Sequence[Mapping],
+    Sequence[Mapping[str, Any]],
     str
 ]
 DynamoDBValue = Mapping[DynamoDBTypeSymbol, DynamoDBSerialValue]

@@ -44,7 +44,7 @@ class Serializer:
         datetime_format=DateFormat.ISO_8601,
         fraction_type=DynamoDBType.NUMBER,
         empty_set_type=DynamoDBType.NUMBER_SET
-    ):
+    ) -> None:
         decimal_traps = [
             decimal.Clamped,
             decimal.Overflow,
