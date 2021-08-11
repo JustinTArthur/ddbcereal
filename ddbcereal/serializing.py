@@ -17,12 +17,12 @@ from binascii import b2a_base64
 from collections.abc import ByteString, Set
 from datetime import datetime
 from fractions import Fraction
-from typing import Any, Callable, Mapping, MutableMapping, Union
+from typing import Any, Callable, Mapping, MutableMapping, Union, Type
 
 from ddbcereal.exceptions import NumberInexactError, NumberNotAllowedError
 from ddbcereal.types import DateFormat, DynamoDBType, DynamoDBValue
 
-NoneType = type(None)
+NoneType = type(None)  # type: Type[None]
 
 DDB_NUMBER_EMIN = -128
 DDB_NUMBER_EMAX = 126
@@ -101,7 +101,7 @@ class Serializer:
         self._create_decimal = decimal_ctx.create_decimal
         self._decimal_divide = decimal_ctx.divide
 
-        self._empty_set = {empty_set_type.value: []}
+        self._empty_set: DynamoDBValue = {empty_set_type.value: []}
 
     def serialize(self, value: Any) -> DynamoDBValue:
         value_type = type(value)
@@ -198,7 +198,7 @@ def serialize_number(value):
     return {'N': str(value)}
 
 
-def serialize_none(value: NoneType):
+def serialize_none(value: None):
     return {'NULL': True}
 
 
